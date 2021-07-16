@@ -2,7 +2,7 @@ import MainGrid from '../src/components/MainGrid'
 import Box from '../src/components/Box'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AluraCommons'
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 function ProfileSidebar(props) {
   return (
@@ -22,8 +22,32 @@ function ProfileSidebar(props) {
   )
 }
 
+function ProfileRelationsBox(props) {
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">
+      {props.title} ({props.items.length})
+      </h2>
+      <ul>
+      { props.items.slice(0,6).map((item) => {
+      return (
+        <li key={item.id}>
+          <a target="_blank" href={item.html_url}>
+          <img src={item.avatar_url} />
+          <span>{item.login}</span>
+        </a>
+        </li>
+      )
+      }) }
+      </ul>
+      <hr/>
+      <a className="boxLink" href="#">Ver mais</a>
+    </ProfileRelationsBoxWrapper>
+  )
+}
+
 export default function Home() {
-  const [communities, setCommunities] = useState([{id: 1, title: 'Eu odeio acordar cedo', img: 'https://img10.orkut.br.com/community/b62636a928d479ea6b865953c0ee1010.png'}])
+  const [communities, setCommunities] = useState([])
   const githubUser = 'brhcastro'
   const peopleFavorites = [
     'juunegreiros',
@@ -34,6 +58,41 @@ export default function Home() {
     'felipefialho',
     'guilhermesilveira'
   ]
+
+  const [followers, setFollowers] = useState([])
+  useEffect(()=>{
+    fetch('https://api.github.com/users/BrHCastro/followers')
+    .then((result) => {
+      if(result.ok) {
+        return result.json()
+      }
+      throw new Error(`Houve um erro na solicitação | Status: ${result.status}`)
+    })
+    .then((resp) => {
+      setFollowers(resp)
+    })
+    .catch((error)=>{
+      console.log(error)
+    })
+  }, [])
+
+  const [following, setFollowing] = useState([])
+  useEffect(()=>{
+    fetch('https://api.github.com/users/BrHCastro/following')
+    .then((result) => {
+      if(result.ok) {
+        return result.json()
+      }
+      throw new Error(`Houve um erro na solicitação | Status: ${result.status}`)
+    })
+    .then((resp) => {
+      setFollowing(resp)
+    })
+    .catch((error)=>{
+      console.log(error)
+    })
+  }, [])
+
   return (
     <>
     <AlurakutMenu githubUser={ githubUser }/>
@@ -128,6 +187,8 @@ export default function Home() {
           <hr/>
           <a className="boxLink" href="#">Ver mais</a>
         </ProfileRelationsBoxWrapper>
+        <ProfileRelationsBox title="Seguidores" items={followers}/>
+        <ProfileRelationsBox title="Seguido" items={following}/>
       </div>
     </MainGrid>
     </>
