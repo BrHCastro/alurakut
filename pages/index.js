@@ -58,9 +58,12 @@ export default function Home() {
     'felipefialho',
     'guilhermesilveira'
   ]
-
+  
   const [followers, setFollowers] = useState([])
+  const [following, setFollowing] = useState([])
+
   useEffect(()=>{
+    //Seguidores
     fetch('https://api.github.com/users/BrHCastro/followers')
     .then((result) => {
       if(result.ok) {
@@ -69,15 +72,14 @@ export default function Home() {
       throw new Error(`Houve um erro na solicitação | Status: ${result.status}`)
     })
     .then((resp) => {
+      console.log(resp)
       setFollowers(resp)
     })
     .catch((error)=>{
       console.log(error)
     })
-  }, [])
 
-  const [following, setFollowing] = useState([])
-  useEffect(()=>{
+    //Seguido
     fetch('https://api.github.com/users/BrHCastro/following')
     .then((result) => {
       if(result.ok) {
@@ -86,11 +88,37 @@ export default function Home() {
       throw new Error(`Houve um erro na solicitação | Status: ${result.status}`)
     })
     .then((resp) => {
+      console.log(resp)
       setFollowing(resp)
     })
     .catch((error)=>{
       console.log(error)
     })
+
+    //Comunidades
+    fetch('https://graphql.datocms.com/', {
+      method: 'POST',
+      headers: {
+        'Authorization': '3063f82c0e27c7966fe021df36caff',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ "query": `query {
+        allCommunities {
+          id
+          title
+          imageUrl
+          creatorSlug
+        }
+      }`})
+    })
+    .then((response) => response.json())
+    .then((respComp) => {
+      const community = respComp.data.allCommunities
+      console.log(community)
+      setCommunities(community)
+    })
+
   }, [])
 
   return (
@@ -122,10 +150,27 @@ export default function Home() {
               alert('Por favor, insira uma URL com a imagem para a sua comunidade.')
             } else {
 
-              const community = {id: new Date().toISOString(), title: title, img: image}
+              const community = {title: title, imageUrl: image, creatorSlug: githubUser }
 
-              const communitiesUpdated = [...communities, community]
-              setCommunities(communitiesUpdated)
+              fetch('/api/communities', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(community)
+              })
+              .then(async (resp) => {
+                const dados = await resp.json()
+                console.log(dados.recordCreated)
+
+                const communitiesUpdated = [...communities, dados.recordCreated]
+                setCommunities(communitiesUpdated)
+
+
+                document.querySelector('[name=title]').value = ""
+                document.querySelector('[name=image]').value = ""
+              })
+
             }
           }}>
             <div>
@@ -149,6 +194,8 @@ export default function Home() {
         </Box>
       </div>
       <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
+        <ProfileRelationsBox title="Seguidores" items={followers}/>
+        <ProfileRelationsBox title="Seguido" items={following}/>
         <ProfileRelationsBoxWrapper>
         <h2 className="smallTitle">
             Comunidade ({communities.length})
@@ -157,8 +204,8 @@ export default function Home() {
           { communities.slice(0,6).map((community) => {
             return (
               <li key={community.id}>
-                <a href={`/community/${community.title}`}>
-                <img src={community.img} />
+                <a href={`/community/${community.id}`}>
+                <img src={community.imageUrl} />
                 <span>{community.title}</span>
               </a>
               </li>
@@ -187,8 +234,6 @@ export default function Home() {
           <hr/>
           <a className="boxLink" href="#">Ver mais</a>
         </ProfileRelationsBoxWrapper>
-        <ProfileRelationsBox title="Seguidores" items={followers}/>
-        <ProfileRelationsBox title="Seguido" items={following}/>
       </div>
     </MainGrid>
     </>

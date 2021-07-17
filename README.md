@@ -38,3 +38,12 @@
 - [x] Conhecer o DatoCMS, o sistema de gestão de conteúdo que iremos utilizar na nossa aplicação;
 - [x] Criar os modelos dos conteúdos que iremos gerenciar no DatoCMS;
 - [x] Criar nossas comunidades pela interface do DatoCMS.
+
+>## Aula 4: Requisições com GraphQL, BFF e AJAX!
+<br/>
+
+## Conteúdo detalhado desta aula
+- [x] Entenderemos o que é XML e AJAX;
+- [x] Usaremos queries GraphQL para consumir os dados do DatoCMS;
+- [x] Fazer um BFF (Back-end For Front-end) para proteger nossos dados ao enviar dados para o servidor;
+- [x] Criar nossas comunidades pela interface do nosso Alurakut.
