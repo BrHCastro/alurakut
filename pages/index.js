@@ -51,22 +51,12 @@ function ProfileRelationsBox(props) {
 export default function Home(props) {
   const [communities, setCommunities] = useState([])
   const githubUser = props.githubUser
-  const peopleFavorites = [
-    'juunegreiros',
-    'omariosouto',
-    'peas',
-    'rafaballerini',
-    'marcobrunodev',
-    'felipefialho',
-    'guilhermesilveira'
-  ]
-  
   const [followers, setFollowers] = useState([])
   const [following, setFollowing] = useState([])
 
   useEffect(()=>{
     //Seguidores
-    fetch('https://api.github.com/users/BrHCastro/followers')
+    fetch(`https://api.github.com/users/${githubUser}/followers`)
     .then((result) => {
       if(result.ok) {
         return result.json()
@@ -74,15 +64,14 @@ export default function Home(props) {
       throw new Error(`Houve um erro na solicitação | Status: ${result.status}`)
     })
     .then((resp) => {
-      console.log(resp)
       setFollowers(resp)
     })
     .catch((error)=>{
       console.log(error)
     })
 
-    //Seguido
-    fetch('https://api.github.com/users/BrHCastro/following')
+    //Seguindo
+    fetch(`https://api.github.com/users/${githubUser}/following`)
     .then((result) => {
       if(result.ok) {
         return result.json()
@@ -90,7 +79,6 @@ export default function Home(props) {
       throw new Error(`Houve um erro na solicitação | Status: ${result.status}`)
     })
     .then((resp) => {
-      console.log(resp)
       setFollowing(resp)
     })
     .catch((error)=>{
@@ -117,8 +105,15 @@ export default function Home(props) {
     .then((response) => response.json())
     .then((respComp) => {
       const community = respComp.data.allCommunities
-      console.log(community)
-      setCommunities(community)
+      const filtered = (val) => {
+        if (val.creatorSlug === githubUser) {
+          return true
+        } else {
+          return false
+        }
+      }
+      const communityFiltered = community.filter(filtered);
+      setCommunities(communityFiltered)
     })
 
   }, [])
@@ -163,8 +158,6 @@ export default function Home(props) {
               })
               .then(async (resp) => {
                 const dados = await resp.json()
-                console.log(dados.recordCreated)
-
                 const communitiesUpdated = [...communities, dados.recordCreated]
                 setCommunities(communitiesUpdated)
 
@@ -197,7 +190,7 @@ export default function Home(props) {
       </div>
       <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
         <ProfileRelationsBox title="Seguidores" items={followers}/>
-        <ProfileRelationsBox title="Seguido" items={following}/>
+        <ProfileRelationsBox title="Seguindo" items={following}/>
         <ProfileRelationsBoxWrapper>
         <h2 className="smallTitle">
             Comunidade ({communities.length})
@@ -209,25 +202,6 @@ export default function Home(props) {
                 <a href={`/community/${community.id}`}>
                 <img src={community.imageUrl} />
                 <span>{community.title}</span>
-              </a>
-              </li>
-            )
-          }) }
-          </ul>
-          <hr/>
-          <a className="boxLink" href="#">Ver mais</a>
-        </ProfileRelationsBoxWrapper>
-        <ProfileRelationsBoxWrapper>
-          <h2 className="smallTitle">
-            Pessoas da comunidade ({peopleFavorites.length})
-          </h2>
-          <ul>
-          { peopleFavorites.slice(0,6).map((person) => {
-            return (
-              <li key={person}>
-                <a href={`/users/${person}`}>
-                <img src={`https://github.com/${person}.png`} />
-                <span>{person}</span>
               </a>
               </li>
             )
@@ -264,7 +238,7 @@ export async function getServerSideProps(context) {
   }
 
   const { githubUser } = jwt.decode(token)
-  
+
   return {
     props: {
       githubUser // Se o nome da chave foi igual o da variável podemos usar deste jeito.
