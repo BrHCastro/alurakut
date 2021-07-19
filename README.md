@@ -47,3 +47,13 @@
 - [x] Usaremos queries GraphQL para consumir os dados do DatoCMS;
 - [x] Fazer um BFF (Back-end For Front-end) para proteger nossos dados ao enviar dados para o servidor;
 - [x] Criar nossas comunidades pela interface do nosso Alurakut.
+
+>## Aula 5: Sistema de Login
+
+## Conteúdo detalhado desta aula
+- [x] Criar a nossa página de Login;
+- [x] Roteamento com Next.js;
+- [x] Como funciona o redirecionamento de páginas;
+- [x] Formulários com gerenciamento do estado do input;
+- [x] Salvar cookies com o padrão JWT para autenticar nossa página;
+- [x] Decodificar o nosso token para mostrar a nossa Home apenas para usuários autenticados;
